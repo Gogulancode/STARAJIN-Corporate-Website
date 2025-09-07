@@ -1,0 +1,88 @@
+{
+  "nav": {
+    "home": "홈",
+    "about": "회사소개",
+    "services": "서비스",
+    "projects": "프로젝트",
+    "culture": "문화교류",
+    "media": "미디어",
+    "contact": "연락처"
+  },
+  "hero": {
+    "title": "한국과 인도의 글로벌 비전을 실현합니다",
+    "subtitle": "두 역동적인 경제권에서 시장 진출, 문화 교류, 사업 확장을 위한 신뢰할 수 있는 파트너",
+    "cta": "여정 시작하기"
+  },
+  "values": {
+    "title": "핵심 가치",
+    "bridging": "연결",
+    "bridgingDesc": "한국의 혁신과 인도의 기회를 연결",
+    "expertise": "전문성",
+    "expertiseDesc": "깊은 시장 지식과 규제 통찰력",
+    "innovation": "혁신",
+    "innovationDesc": "복잡한 비즈니스 과제를 위한 창의적 솔루션",
+    "sustainability": "지속가능성",
+    "sustainabilityDesc": "상호 성장을 위한 장기적 파트너십 구축",
+    "trust": "신뢰",
+    "trustDesc": "진실성을 바탕으로 한 투명한 관계"
+  },
+  "services": {
+    "title": "서비스",
+    "marketEntry": "시장 진출 전략",
+    "marketEntryDesc": "종합적인 시장 분석 및 진출 계획",
+    "culturalExchange": "문화 교류",
+    "culturalExchangeDesc": "한국과 인도 문화 간의 이해 촉진",
+    "businessConsulting": "비즈니스 컨설팅",
+    "businessConsultingDesc": "확장 및 운영을 위한 전략적 지침",
+    "jvma": "합작투자/M&A 자문",
+    "jvmaDesc": "파트너십 및 인수에 대한 전문 조언"
+  },
+  "about": {
+    "title": "스타라진 소개",
+    "description": "2020년에 설립된 스타라진은 한국의 혁신과 인도 시장 기회를 연결하는 가교 역할을 합니다. 한국과 인도에 사무소를 두고 있으며, 이 역동적인 시장으로의 확장을 원하는 기업들에게 종합적인 컨설팅 서비스를 제공합니다.",
+    "mission": "한국과 인도 간의 성공적인 확장을 위한 전문적인 지침과 문화적 통찰력을 제공하여 기업에게 힘을 실어주는 것",
+    "vision": "한국-인도 비즈니스 파트너십과 문화 교류를 촉진하는 선도적인 컨설팅 회사가 되는 것"
+  },
+  "contact": {
+    "title": "연락처",
+    "getInTouch": "문의하기",
+    "offices": "사무소",
+    "korea": "한국 사무소",
+    "india": "인도 사무소",
+    "form": {
+      "name": "성명",
+      "email": "이메일 주소",
+      "message": "메시지",
+      "send": "메시지 보내기"
+    }
+  },
+  "whyStarajin": {
+    "title": "왜 스타라진인가?",
+    "description": "15년간 구축된 깊은 전문성과 광범위한 네트워크를 통해 한국-인도 비즈니스 파트너십에서 비교할 수 없는 가치를 제공합니다.",
+    "yearsExperience": "년간의 우수성",
+    "businessSubtitle": "한국-인도 비즈니스 분야에서",
+    "stats": {
+      "years": {
+        "title": "인도 현지 경험",
+        "description": "전문가와 노하우를 바탕으로 한 15년간의 인도 경험"
+      },
+      "network": {
+        "title": "네트워크",
+        "description": "한국-인도 정부, 기업, 기관에 걸친 긴밀한 네트워크 구축"
+      },
+      "success": {
+        "title": "성공 사례",
+        "description": "데이터 기반의 맞춤형 전략으로 이룬 많은 성공 스토리"
+      },
+      "support": {
+        "title": "전면 지원",
+        "description": "시장 진출부터 성장까지 종합적인 지원"
+      }
+    },
+    "cta": "서비스 알아보기"
+  },
+  "footer": {
+    "description": "전문 컨설팅과 문화 교류를 통해 한국의 혁신과 인도의 기회를 연결합니다.",
+    "rights": "© 2024 STARAJIN India Pvt. Ltd. 모든 권리 보유."
+  }
+}

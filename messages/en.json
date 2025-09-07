@@ -1,0 +1,88 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About Us",
+    "services": "Services",
+    "projects": "Projects",
+    "culture": "Culture Exchange",
+    "media": "Media",
+    "contact": "Contact"
+  },
+  "hero": {
+    "title": "Empowering Global Visions between Korea and India",
+    "subtitle": "Your trusted partner for market entry, cultural exchange, and business expansion across two dynamic economies",
+    "cta": "Start Your Journey"
+  },
+  "values": {
+    "title": "Our Core Values",
+    "bridging": "Bridging",
+    "bridgingDesc": "Connecting Korean innovation with Indian opportunities",
+    "expertise": "Expertise",
+    "expertiseDesc": "Deep market knowledge and regulatory insights",
+    "innovation": "Innovation",
+    "innovationDesc": "Creative solutions for complex business challenges",
+    "sustainability": "Sustainability",
+    "sustainabilityDesc": "Building long-term partnerships for mutual growth",
+    "trust": "Trust",
+    "trustDesc": "Transparent relationships built on integrity"
+  },
+  "services": {
+    "title": "Our Services",
+    "marketEntry": "Market Entry Strategy",
+    "marketEntryDesc": "Comprehensive market analysis and entry planning",
+    "culturalExchange": "Cultural Exchange",
+    "culturalExchangeDesc": "Facilitating understanding between Korean and Indian cultures",
+    "businessConsulting": "Business Consulting",
+    "businessConsultingDesc": "Strategic guidance for expansion and operations",
+    "jvma": "JV/M&A Advisory",
+    "jvmaDesc": "Expert advice on partnerships and acquisitions"
+  },
+  "about": {
+    "title": "About STARAJIN",
+    "description": "Founded in 2020, STARAJIN serves as a bridge between Korean innovation and Indian market opportunities. With offices in both Korea and India, we provide comprehensive consulting services for businesses looking to expand across these dynamic markets.",
+    "mission": "To empower businesses by providing expert guidance and cultural insights for successful expansion between Korea and India.",
+    "vision": "To be the leading consulting firm facilitating Korea-India business partnerships and cultural exchange."
+  },
+  "contact": {
+    "title": "Contact Us",
+    "getInTouch": "Get in Touch",
+    "offices": "Our Offices",
+    "korea": "Korea Office",
+    "india": "India Office",
+    "form": {
+      "name": "Full Name",
+      "email": "Email Address",
+      "message": "Message",
+      "send": "Send Message"
+    }
+  },
+  "whyStarajin": {
+    "title": "Why Starajin?",
+    "description": "With deep expertise and extensive networks built over 15 years, we provide unmatched value in Korea-India business partnerships.",
+    "yearsExperience": "Years of Excellence",
+    "businessSubtitle": "in Korea-India Business",
+    "stats": {
+      "years": {
+        "title": "years in India",
+        "description": "15 years of experience in India with experts & Knowhows"
+      },
+      "network": {
+        "title": "Network",
+        "description": "Built an intimate network across Korean-Indian government, companies, and institutions"
+      },
+      "success": {
+        "title": "Success Case",
+        "description": "Many success stories with data-driven, customized strategies"
+      },
+      "support": {
+        "title": "Total Support",
+        "description": "Comprehensive support from market entry to growth"
+      }
+    },
+    "cta": "Discover Our Services"
+  },
+  "footer": {
+    "description": "Bridging Korean innovation with Indian opportunities through expert consulting and cultural exchange.",
+    "rights": "© 2024 STARAJIN India Pvt. Ltd. All rights reserved."
+  }
+}
