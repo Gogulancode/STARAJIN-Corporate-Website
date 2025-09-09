@@ -1,0 +1,160 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  firstName    String?  @map("first_name")
+  lastName     String?  @map("last_name")
+  role         Role     @default(EDITOR)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+model Media {
+  id           Int                @id @default(autoincrement())
+  filename     String
+  storedFilename String?
+  url          String             @unique
+  mime         String
+  size         Int?
+  width        Int?
+  height       Int?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  translations MediaTranslation[]
+  pageTranslations PageTranslation[]
+
+  @@map("media")
+}
+
+model MediaTranslation {
+  id      Int     @id @default(autoincrement())
+  mediaId Int
+  locale  String  // 'en' | 'ko'
+  altText String?
+  media   Media   @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([mediaId, locale])
+  @@map("media_translations")
+}
+
+model Page {
+  id           Int               @id @default(autoincrement())
+  key          String            @unique // 'home' | 'about' | 'contact' | 'media' | 'projects' | 'services'
+  slug         String            @unique // '/home', '/about', ...
+  isEnabled    Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  sections     Section[]
+  translations PageTranslation[]
+
+  @@map("pages")
+}
+
+model PageTranslation {
+  id        Int     @id @default(autoincrement())
+  pageId    Int
+  locale    String
+  title     String?
+  seoTitle  String?
+  seoDesc   String?
+  ogImageId Int?
+  page      Page    @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  ogImage   Media?  @relation(fields: [ogImageId], references: [id])
+
+  @@unique([pageId, locale])
+  @@map("page_translations")
+}
+
+model Section {
+  id           Int                  @id @default(autoincrement())
+  pageId       Int
+  type         String               // 'hero' | 'services' | 'achievements' | 'news' | 'projects' | 'contact' | 'rich'
+  sortOrder    Int                  @default(0)
+  isEnabled    Boolean              @default(true)
+  config       Json?                // non-translatable config (layout, media references, variant)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  page         Page                 @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  translations SectionTranslation[]
+
+  @@map("sections")
+}
+
+model SectionTranslation {
+  id        Int               @id @default(autoincrement())
+  sectionId Int
+  locale    String            // 'en' | 'ko'
+  content   Json              // translatable: heading, subheading, body, bullets, cards, ctas[]
+  status    TranslationStatus @default(DRAFT) // DRAFT | MACHINE | EDITED | APPROVED
+  section   Section           @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@unique([sectionId, locale])
+  @@map("section_translations")
+}
+
+enum TranslationStatus {
+  DRAFT
+  MACHINE
+  EDITED
+  APPROVED
+}
+
+model Menu {
+  id        Int        @id @default(autoincrement())
+  key       String     @unique // 'header' | 'footer'
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  items     MenuItem[]
+
+  @@map("menus")
+}
+
+model MenuItem {
+  id           Int                   @id @default(autoincrement())
+  menuId       Int
+  parentId     Int?
+  isEnabled    Boolean               @default(true)
+  sortOrder    Int                   @default(0)
+  linkType     String                // 'internal' | 'external' | 'email' | 'phone'
+  route        String?               // internal route like '/services'
+  url          String?               // external url
+  newTab       Boolean               @default(false)
+  menu         Menu                  @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  parent       MenuItem?             @relation("MenuItemHierarchy", fields: [parentId], references: [id])
+  children     MenuItem[]            @relation("MenuItemHierarchy")
+  translations MenuItemTranslation[]
+
+  @@map("menu_items")
+}
+
+model MenuItemTranslation {
+  id         Int      @id @default(autoincrement())
+  menuItemId Int
+  locale     String
+  label      String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+  @@unique([menuItemId, locale])
+  @@map("menu_item_translations")
+}

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starajin CMS - Page Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'starajin-blue': '#224288',
+                        'starajin-orange': '#feb25a',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div x-data="pageEditor()" x-init="init()">
+        <!-- Header -->
+        <nav class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center space-x-4">
+                        <a href="/dashboard.html" class="text-starajin-blue hover:text-starajin-orange">
+                            ← Back to Dashboard
+                        </a>
+                        <h1 class="text-xl font-semibold text-gray-900">Page Editor</h1>
+                        <span x-show="currentPage" class="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full" x-text="currentPage?.key"></span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button @click="savePage()" :disabled="saving" 
+                                class="bg-starajin-blue hover:bg-starajin-blue/90 disabled:opacity-50 text-white px-4 py-2 rounded-md text-sm flex items-center">
+                            <span x-show="!saving">Save Changes</span>
+                            <span x-show="saving" class="flex items-center">
+                                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Saving...
+                            </span>
+                        </button>
+                        <span class="text-sm text-gray-600" x-text="'Welcome, ' + user.email"></span>
+                        <button @click="logout()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Page Info Panel -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow p-6 sticky top-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Page Information</h3>
+                        
+                        <div x-show="currentPage" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Page Title</label>
+                                <input type="text" 
+                                       :value="currentPage?.translations?.[0]?.title || ''"
+                                       @input="updatePageTitle($event.target.value)"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-starajin-blue focus:border-transparent">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Meta Description</label>
+                                <textarea rows="3"
+                                          :value="currentPage?.translations?.[0]?.seoDesc || ''"
+                                          @input="updatePageSeoDesc($event.target.value)"
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-starajin-blue focus:border-transparent"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Page Status</label>
+                                <select :value="currentPage?.isEnabled || false"
+                                        @change="updatePageStatus($event.target.value)"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-starajin-blue focus:border-transparent">
+                                    <option value="true">Published</option>
+                                    <option value="false">Draft</option>
+                                </select>
+                            </div>
+
+                            <div class="pt-4 border-t">
+                                <div class="text-sm text-gray-600">
+                                    <p><strong>Page Key:</strong> <span x-text="currentPage ? currentPage.key : ''"></span></p>
+                                    <p><strong>Sections:</strong> <span x-text="sections.length"></span></p>
+                                    <p><strong>Last Updated:</strong> <span x-text="currentPage ? new Date(currentPage.updatedAt).toLocaleDateString() : ''"></span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div x-show="loading" class="text-center py-8">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-starajin-blue"></div>
+                            <p class="mt-2 text-gray-600">Loading page...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sections Editor -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow">
+                        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="text-lg font-medium text-gray-900">Page Sections</h3>
+                            <div class="flex space-x-2">
+                                <button @click="importExistingContent()" :disabled="importing"
+                                        class="bg-starajin-blue hover:bg-starajin-blue/90 disabled:opacity-50 text-white px-4 py-2 rounded-md text-sm flex items-center">
+                                    <span x-show="!importing">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                                        </svg>
+                                        Import Existing Content
+                                    </span>
+                                    <span x-show="importing" class="flex items-center">
+                                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Importing...
+                                    </span>
+                                </button>
+                                <button @click="addSection()" 
+                                        class="bg-starajin-orange hover:bg-starajin-orange/90 text-white px-4 py-2 rounded-md text-sm flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                    Add Section
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-6">
+                            <div x-show="sections.length === 0" class="text-center py-12 text-gray-500">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">No sections</h3>
+                                <p class="mt-1 text-sm text-gray-500">Get started by adding your first section.</p>
+                            </div>
+
+                            <!-- Sections List -->
+                            <div class="space-y-4">
+                                <template x-for="(section, index) in sections" :key="section.tempId || section.id">
+                                    <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                        <!-- Section Header -->
+                                        <div class="flex justify-between items-center mb-4">
+                                            <div class="flex items-center space-x-3">
+                                                <span class="bg-starajin-blue text-white px-2 py-1 rounded text-xs font-medium" x-text="'Section ' + (index + 1)"></span>
+                                                <select x-model="section.type" @change="updateSectionType(section, $event.target.value)"
+                                                        class="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-starajin-blue">
+                                                    <option value="hero">Hero Section</option>
+                                                    <option value="text">Text Section</option>
+                                                    <option value="image">Image Section</option>
+                                                    <option value="text_image">Text + Image</option>
+                                                    <option value="cta">Call to Action</option>
+                                                    <option value="stats">Statistics</option>
+                                                </select>
+                                            </div>
+                                            <div class="flex items-center space-x-2">
+                                                <button @click="moveSectionUp(index)" :disabled="index === 0"
+                                                        class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                                    </svg>
+                                                </button>
+                                                <button @click="moveSectionDown(index)" :disabled="index === sections.length - 1"
+                                                        class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                    </svg>
+                                                </button>
+                                                <button @click="removeSection(index)" 
+                                                        class="p-1 text-red-400 hover:text-red-600">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Section Content Editor -->
+                                        <div class="grid grid-cols-1 gap-4">
+                                            <!-- Title Field -->
+                                            <div x-show="['hero', 'text', 'text_image', 'cta', 'stats'].includes(section.type)">
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                                                <input type="text" x-model="section.content.title" 
+                                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-starajin-blue"
+                                                       placeholder="Enter section title">
+                                            </div>
+
+                                            <!-- Text Content -->
+                                            <div x-show="['hero', 'text', 'text_image'].includes(section.type)">
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Content</label>
+                                                <textarea x-model="section.content.text" rows="4"
+                                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-starajin-blue"
+                                                          placeholder="Enter section content"></textarea>
+                                            </div>
+
+                                            <!-- Image Upload -->
+                                            <div x-show="['hero', 'image', 'text_image'].includes(section.type)">
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Image</label>
+                                                <div class="flex items-center space-x-4">
+                                                    <input type="url" x-model="section.content.imageUrl" 
+                                                           class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-starajin-blue"
+                                                           placeholder="Enter image URL or upload">
+                                                    <input type="file" accept="image/*" @change="uploadImage(section, $event)"
+                                                           class="hidden" :id="'file-' + (section.tempId || section.id)">
+                                                    <button @click="$el.previousElementSibling.click()" 
+                                                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm">
+                                                        Upload
+                                                    </button>
+                                                </div>
+                                                <div x-show="section.content.imageUrl" class="mt-2">
+                                                    <img :src="section.content.imageUrl" :alt="section.content.title" 
+                                                         class="w-32 h-20 object-cover rounded border">
+                                                </div>
+                                            </div>
+
+                                            <!-- CTA Button -->
+                                            <div x-show="['hero', 'cta'].includes(section.type)" class="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
+                                                    <input type="text" x-model="section.content.buttonText" 
+                                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-starajin-blue"
+                                                           placeholder="Button text">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-2">Button Link</label>
+                                                    <input type="url" x-model="section.content.buttonUrl" 
+                                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-starajin-blue"
+                                                           placeholder="Button URL">
+                                                </div>
+                                            </div>
+
+                                            <!-- Statistics -->
+                                            <div x-show="section.type === 'stats'">
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Statistics (JSON format)</label>
+                                                <textarea x-model="section.content.stats" rows="6"
+                                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-starajin-blue font-mono text-sm"
+                                                          placeholder='[{"value": 15, "suffix": "+", "label": "Years Experience"}, {"value": 100, "suffix": "%", "label": "Success Rate"}]'></textarea>
+                                            </div>
+
+                                            <!-- Layout Options -->
+                                            <div x-show="section.type === 'text_image'" class="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-2">Image Position</label>
+                                                    <select x-model="section.content.imagePosition" 
+                                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-starajin-blue">
+                                                        <option value="left">Left</option>
+                                                        <option value="right">Right</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-gray-700 mb-2">Background Color</label>
+                                                    <select x-model="section.content.backgroundColor" 
+                                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-starajin-blue">
+                                                        <option value="white">White</option>
+                                                        <option value="gray">Light Gray</option>
+                                                        <option value="blue">Starajin Blue</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Section Preview -->
+                                        <div class="mt-4 p-4 bg-white border border-gray-200 rounded">
+                                            <div class="text-xs text-gray-500 mb-2">Preview:</div>
+                                            <div class="text-sm">
+                                                <div x-show="section.content.title" class="font-semibold mb-1" x-text="section.content.title"></div>
+                                                <div x-show="section.content.text" class="text-gray-600 text-xs" x-text="section.content.text?.substring(0, 100) + (section.content.text?.length > 100 ? '...' : '')"></div>
+                                                <div x-show="section.content.buttonText" class="inline-block bg-starajin-orange text-white px-2 py-1 rounded text-xs mt-2" x-text="section.content.buttonText"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div x-show="message" x-transition class="fixed bottom-4 right-4 z-50">
+            <div :class="messageType === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'" 
+                 class="border px-4 py-3 rounded-lg shadow-lg">
+                <span x-text="message"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function pageEditor() {
+            return {
+                user: {},
+                currentPage: null,
+                sections: [],
+                loading: false,
+                saving: false,
+                importing: false,
+                message: '',
+                messageType: 'success',
+                
+                init() {
+                    // Check authentication
+                    const token = localStorage.getItem('cms_token');
+                    const userData = localStorage.getItem('cms_user');
+                    
+                    if (!token || !userData) {
+                        window.location.href = '/';
+                        return;
+                    }
+                    
+                    this.user = JSON.parse(userData);
+                    
+                    // Get page key from URL params
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const pageKey = urlParams.get('page') || 'home';
+                    
+                    this.loadPage(pageKey);
+                },
+                
+                async loadPage(pageKey) {
+                    this.loading = true;
+                    try {
+                        const response = await fetch(`http://localhost:3004/api/pages?key=${pageKey}`);
+                        const data = await response.json();
+                        
+                        if (data.success && data.data.length > 0) {
+                            this.currentPage = data.data[0];
+                            this.loadSections();
+                        } else {
+                            throw new Error('Page not found');
+                        }
+                    } catch (error) {
+                        this.showMessage('Error loading page: ' + error.message, 'error');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                loadSections() {
+                    // Load existing sections from the current page
+                    if (this.currentPage.sections && this.currentPage.sections.length > 0) {
+                        this.sections = this.currentPage.sections.map(section => ({
+                            id: section.id,
+                            type: section.type,
+                            sortOrder: section.sortOrder,
+                            isEnabled: section.isEnabled,
+                            content: section.translations[0]?.content || this.getDefaultContent(section.type)
+                        }));
+                    } else {
+                        // If no sections exist, add a sample hero section
+                        this.sections = [];
+                        this.addSection('hero');
+                    }
+                },
+                
+                addSection(type = 'text') {
+                    const newSection = {
+                        tempId: 'temp_' + Date.now(),
+                        type: type,
+                        sortOrder: this.sections.length,
+                        isEnabled: true,
+                        content: this.getDefaultContent(type)
+                    };
+                    
+                    this.sections.push(newSection);
+                },
+                
+                getDefaultContent(type) {
+                    const defaults = {
+                        hero: {
+                            title: 'Welcome to Starajin',
+                            text: 'Your trusted partner for Korea-India business success',
+                            imageUrl: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&h=500&fit=crop',
+                            buttonText: 'Get Started',
+                            buttonUrl: '#contact',
+                            backgroundColor: 'blue'
+                        },
+                        text: {
+                            title: 'Section Title',
+                            text: 'Enter your content here...',
+                            backgroundColor: 'white'
+                        },
+                        image: {
+                            imageUrl: '',
+                            title: 'Image Title',
+                            backgroundColor: 'white'
+                        },
+                        text_image: {
+                            title: 'Text and Image Section',
+                            text: 'Enter your content here...',
+                            imageUrl: '',
+                            imagePosition: 'right',
+                            backgroundColor: 'white'
+                        },
+                        cta: {
+                            title: 'Ready to Get Started?',
+                            text: 'Contact us today for a consultation',
+                            buttonText: 'Contact Us',
+                            buttonUrl: '#contact',
+                            backgroundColor: 'blue'
+                        },
+                        stats: {
+                            title: 'Our Achievements',
+                            stats: JSON.stringify([
+                                {"value": 15, "suffix": "+", "label": "Years Experience"},
+                                {"value": 1000, "suffix": "+", "label": "Network"},
+                                {"value": 50, "suffix": "+", "label": "Success Cases"},
+                                {"value": 100, "suffix": "%", "label": "Success Rate"}
+                            ], null, 2)
+                        }
+                    };
+                    
+                    return defaults[type] || defaults.text;
+                },
+                
+                updateSectionType(section, newType) {
+                    section.content = this.getDefaultContent(newType);
+                },
+                
+                removeSection(index) {
+                    if (confirm('Are you sure you want to remove this section?')) {
+                        this.sections.splice(index, 1);
+                        this.updateSortOrder();
+                    }
+                },
+                
+                moveSectionUp(index) {
+                    if (index > 0) {
+                        [this.sections[index], this.sections[index - 1]] = [this.sections[index - 1], this.sections[index]];
+                        this.updateSortOrder();
+                    }
+                },
+                
+                moveSectionDown(index) {
+                    if (index < this.sections.length - 1) {
+                        [this.sections[index], this.sections[index + 1]] = [this.sections[index + 1], this.sections[index]];
+                        this.updateSortOrder();
+                    }
+                },
+                
+                updateSortOrder() {
+                    this.sections.forEach((section, index) => {
+                        section.sortOrder = index;
+                    });
+                },
+                
+                async uploadImage(section, event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    
+                    try {
+                        const formData = new FormData();
+                        formData.append('image', file);
+                        
+                        const response = await fetch('http://localhost:3004/api/upload', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            section.content.imageUrl = result.data.url;
+                            this.showMessage('Image uploaded successfully!', 'success');
+                        } else {
+                            throw new Error(result.error || 'Failed to upload image');
+                        }
+                    } catch (error) {
+                        this.showMessage('Error uploading image: ' + error.message, 'error');
+                    }
+                },
+                
+                async importExistingContent() {
+                    this.importing = true;
+                    try {
+                        const response = await fetch('http://localhost:3004/api/import-home-content', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('cms_token')}`
+                            }
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            this.showMessage('✅ Existing home page content imported successfully!', 'success');
+                            // Reload the page to show imported content
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            this.showMessage('Failed to import content: ' + result.error, 'error');
+                        }
+                    } catch (error) {
+                        this.showMessage('Error importing content: ' + error.message, 'error');
+                    }
+                    this.importing = false;
+                },
+                
+                async savePage() {
+                    this.saving = true;
+                    try {
+                        // Prepare sections data
+                        const sectionsData = this.sections.map(section => ({
+                            type: section.type,
+                            content: typeof section.content === 'string' ? section.content : JSON.stringify(section.content),
+                            sortOrder: section.sortOrder,
+                            isEnabled: section.isEnabled
+                        }));
+                        
+                        const updateData = {
+                            title: this.currentPage.translations[0]?.title,
+                            seoDesc: this.currentPage.translations[0]?.seoDesc,
+                            isEnabled: this.currentPage.isEnabled,
+                            sections: sectionsData
+                        };
+                        
+                        const response = await fetch(`http://localhost:3004/api/pages/${this.currentPage.id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('cms_token')}`
+                            },
+                            body: JSON.stringify(updateData)
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            this.showMessage('Page saved successfully!', 'success');
+                        } else {
+                            throw new Error(result.error || 'Failed to save page');
+                        }
+                    } catch (error) {
+                        this.showMessage('Error saving page: ' + error.message, 'error');
+                    } finally {
+                        this.saving = false;
+                    }
+                },
+                
+                updatePageTitle(value) {
+                    if (this.currentPage && this.currentPage.translations && this.currentPage.translations[0]) {
+                        this.currentPage.translations[0].title = value;
+                    }
+                },
+                
+                updatePageSeoDesc(value) {
+                    if (this.currentPage && this.currentPage.translations && this.currentPage.translations[0]) {
+                        this.currentPage.translations[0].seoDesc = value;
+                    }
+                },
+                
+                updatePageStatus(value) {
+                    if (this.currentPage) {
+                        this.currentPage.isEnabled = value === 'true';
+                    }
+                },
+                
+                showMessage(text, type = 'success') {
+                    this.message = text;
+                    this.messageType = type;
+                    setTimeout(() => {
+                        this.message = '';
+                    }, 5000);
+                },
+                
+                logout() {
+                    localStorage.removeItem('cms_token');
+                    localStorage.removeItem('cms_user');
+                    window.location.href = '/';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
