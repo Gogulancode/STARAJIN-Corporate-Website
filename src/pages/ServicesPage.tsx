@@ -1,128 +1,184 @@
-import React from 'react';
-import { TrendingUp, Users, Building, Handshake, Target, Globe, CheckCircle, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '../contexts/I18nContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function ServicesPage() {
-  const { t } = useLanguage();
+  const { language } = useLanguage();
+  const navigate = useNavigate();
 
-  const services = [
-    {
-      key: 'marketEntry',
-      icon: TrendingUp,
-      image: 'https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg',
-      features: ['Market Research & Analysis', 'Entry Strategy Development', 'Risk Assessment', 'Regulatory Compliance'],
-      description: 'Comprehensive market analysis and strategic planning for successful entry into Korean and Indian markets.'
+  // Define multilingual content
+  const content = {
+    en: {
+      heroTitle: "Services"
     },
-    {
-      key: 'culturalExchange',
-      icon: Users,
-      image: 'https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg',
-      features: ['Cultural Training Programs', 'Language Support', 'Cross-cultural Communication', 'Local Insights'],
-      description: 'Bridge cultural gaps with our comprehensive exchange programs and cultural understanding initiatives.'
-    },
-    {
-      key: 'businessConsulting',
-      icon: Building,
-      image: 'https://images.pexels.com/photos/3184297/pexels-photo-3184297.jpeg',
-      features: ['Strategic Planning', 'Operations Setup', 'Legal Compliance', 'Business Development'],
-      description: 'End-to-end business consulting services for establishing and growing your operations.'
-    },
-    {
-      key: 'jvma',
-      icon: Handshake,
-      image: 'https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg',
-      features: ['Partner Identification', 'Due Diligence', 'Deal Structuring', 'Negotiation Support'],
-      description: 'Expert guidance for joint ventures, mergers, and acquisitions between Korean and Indian companies.'
-    },
-    {
-      key: 'hrSupport',
-      icon: Target,
-      image: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg',
-      features: ['Local Hiring', 'Talent Acquisition', 'HR Compliance', 'Training Programs'],
-      description: 'Complete HR solutions including local hiring, compliance, and talent development programs.'
-    },
-    {
-      key: 'factoryLocation',
-      icon: Globe,
-      image: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg',
-      features: ['Site Selection', 'Infrastructure Analysis', 'Government Liaison', 'Setup Support'],
-      description: 'Strategic factory location search and setup assistance with government relations support.'
+    ko: {
+      heroTitle: "서비스"
     }
-  ];
+  };
+
+  const currentContent = content[language as keyof typeof content] || content.en;
 
   return (
     <main className="min-h-screen pt-16">
-      {/* Hero Section */}
-      <section className="pt-20 pb-16 starajin-gradient">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-white py-20">
-            <h1 className="text-5xl font-bold mb-6">{t('services.title')}</h1>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Comprehensive solutions for Korea-India business expansion and cultural exchange
-            </p>
+      {/* Simple Hero Banner Section with Background Image */}
+      <section className="hero-banner relative h-[60vh] min-h-[400px] bg-cover bg-center bg-no-repeat overflow-hidden"
+        style={{
+          backgroundImage: `linear-gradient(rgba(34, 66, 136, 0.7), rgba(34, 66, 136, 0.7)), url('https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg')`,
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-[#224288]/80 via-[#224288]/70 to-[#feb25a]/20"></div>
+        
+        <div className="relative h-full flex items-center justify-center">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            
+            {/* Page Title */}
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-6xl md:text-7xl font-bold text-white mb-8 leading-tight"
+            >
+              {currentContent.heroTitle}
+            </motion.h1>
+
+            {/* Breadcrumb Navigation */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="flex items-center justify-center text-lg"
+            >
+              <span 
+                onClick={() => navigate('/')}
+                className="text-white hover:text-[#feb25a] cursor-pointer transition-colors duration-300"
+              >
+                Home
+              </span>
+              <span className="mx-3 text-[#feb25a]">→</span>
+              <span className="text-[#feb25a] font-semibold">{currentContent.heroTitle}</span>
+            </motion.div>
+
           </div>
         </div>
       </section>
 
-      {/* Services Grid */}
+      {/* Tailored Services Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {services.map((service, index) => {
-              const Icon = service.icon;
+          
+          {/* Section Header */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-16">
+            <div>
+              <div className="inline-block px-4 py-2 bg-gray-100 rounded-full text-sm font-medium text-gray-700 mb-6">
+                SERVICES
+              </div>
               
-              return (
-                <div
-                  key={service.key}
-                  className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden"
-                >
-                  {/* Image Section */}
-                  <div className="relative h-64 overflow-hidden">
-                    <img
-                      src={service.image}
-                      alt={t(`services.${service.key}`)}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-                    
-                    {/* Icon */}
-                    <div className="absolute top-6 left-6 w-14 h-14 bg-starajin-orange rounded-2xl flex items-center justify-center shadow-lg">
-                      <Icon className="w-7 h-7 text-white" />
-                    </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
+                Tailored Services to <span className="text-[#4A90E2]">Grow</span> &<br />
+                <span className="text-[#4A90E2]">Protect</span> Your Business
+              </h2>
+            </div>
+            
+            <div className="lg:pt-12">
+              <p className="text-gray-600 text-lg leading-relaxed">
+                No matter where you are today, our comprehensive solutions are 
+                designed to meet you there — and guide you to where you 
+                truly want to be.
+              </p>
+            </div>
+          </div>
 
-                    {/* Service Title */}
-                    <div className="absolute bottom-6 left-6 right-6">
-                      <h3 className="text-2xl font-bold text-white">
-                        {t(`services.${service.key}`)}
-                      </h3>
-                    </div>
-                  </div>
-                  
-                  {/* Content Section */}
-                  <div className="p-8">
-                    <p className="text-gray-600 mb-6 leading-relaxed">
-                      {service.description}
-                    </p>
-                    
-                    {/* Features */}
-                    <div className="space-y-3 mb-6">
-                      {service.features.map((feature, idx) => (
-                        <div key={idx} className="flex items-center space-x-3">
-                          <CheckCircle className="w-5 h-5 text-starajin-blue flex-shrink-0" />
-                          <span className="text-gray-700 font-medium">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    {/* CTA */}
-                    <button className="group/btn inline-flex items-center text-starajin-blue font-semibold hover:text-starajin-orange transition-colors">
-                      Learn More
-                      <ArrowRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                    </button>
+          {/* Services Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            
+            {/* Service 1 - Market Entry */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              viewport={{ once: true }}
+              className="group bg-gray-50 rounded-3xl p-8 hover:bg-white hover:shadow-lg transition-all duration-300"
+            >
+              <div className="w-16 h-16 bg-[#4A90E2]/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#4A90E2]/20 transition-colors">
+                <div className="w-8 h-8 bg-[#4A90E2] rounded-lg flex items-center justify-center">
+                  <ArrowRight className="w-4 h-4 text-white rotate-45" />
+                </div>
+              </div>
+              
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Market Entry</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Comprehensive market analysis and strategic planning for successful entry into Indian markets with regulatory compliance.
+              </p>
+            </motion.div>
+
+            {/* Service 2 - Investment Advisory */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="group bg-gray-50 rounded-3xl p-8 hover:bg-white hover:shadow-lg transition-all duration-300"
+            >
+              <div className="w-16 h-16 bg-[#4A90E2]/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#4A90E2]/20 transition-colors">
+                <div className="w-8 h-8 bg-[#4A90E2] rounded-lg flex items-center justify-center">
+                  <div className="w-4 h-4 border-2 border-white rounded-full flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+              
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Investment Advisory</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Find clarity, direction, and confidence to thrive in your investment journey with our expert guidance.
+              </p>
+            </motion.div>
+
+            {/* Service 3 - Business Strategy */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              viewport={{ once: true }}
+              className="group bg-gray-50 rounded-3xl p-8 hover:bg-white hover:shadow-lg transition-all duration-300"
+            >
+              <div className="w-16 h-16 bg-[#4A90E2]/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#4A90E2]/20 transition-colors">
+                <div className="w-8 h-8 bg-[#4A90E2] rounded-lg flex items-center justify-center">
+                  <div className="w-4 h-4 border-2 border-white rounded-sm flex items-center justify-center">
+                    <div className="w-1 h-2 bg-white"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Business Strategy</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Break free from limiting beliefs and adopt a powerful, growth-focused business strategy for sustainable success.
+              </p>
+            </motion.div>
+
+            {/* Service 4 - Partnership */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              viewport={{ once: true }}
+              className="group bg-gray-50 rounded-3xl p-8 hover:bg-white hover:shadow-lg transition-all duration-300"
+            >
+              <div className="w-16 h-16 bg-[#4A90E2]/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#4A90E2]/20 transition-colors">
+                <div className="w-8 h-8 bg-[#4A90E2] rounded-lg flex items-center justify-center">
+                  <div className="w-4 h-4 flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full mr-0.5"></div>
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Partnership</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Strengthen your business relationships by nurturing connection, communication, and strategic partnerships.
+              </p>
+            </motion.div>
+
           </div>
         </div>
       </section>

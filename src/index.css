@@ -377,6 +377,14 @@ body {
     radial-gradient(circle at 75% 75%, var(--starajin-orange-200) 0%, transparent 50%);
 }
 
+/* Grid Pattern Background */
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
 .card-hover {
   transition: all var(--transition-normal);
 }
@@ -406,4 +414,28 @@ body {
 .focus-ring:focus-visible {
   outline: 2px solid var(--starajin-primary);
   outline-offset: 2px;
+}
+
+/* ===== HERO BANNER STYLES ===== */
+.hero-title {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero-breadcrumb {
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive hero heights */
+@media (max-width: 768px) {
+  .hero-banner {
+    height: 50vh !important;
+    min-height: 300px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-banner {
+    height: 40vh !important;
+    min-height: 250px !important;
+  }
 }
